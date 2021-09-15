@@ -2,6 +2,7 @@ from tqdm import tqdm
 import torch
 import numbers
 import logging
+import pandas as pd
 import numpy as np
 from torch.utils.data import DataLoader
 
@@ -175,3 +176,68 @@ class Evaluator:
                     else:
                         if not metric_name in ["preds", "labels"] and not metric_name.startswith("_"):
                             logger.info("{}: {}".format(metric_name, metric_val))
+
+    @staticmethod
+    def log_results(results, dataset_name, epoch, steps, logging, print, dframe, save_dir, num_fold=None):
+        # Print a header
+        header = "\n\n"
+        header += BUSH_SEP + "\n"
+        header += "***************************************************\n"
+        if num_fold:
+            header += f"***** EVALUATION | FOLD: {num_fold} | {dataset_name.upper()} SET | AFTER {steps} BATCHES *****\n"
+        else:
+            header += f"***** EVALUATION | {dataset_name.upper()} SET | AFTER {steps} BATCHES *****\n"
+        header += "***************************************************\n"
+        header += BUSH_SEP + "\n"
+        logger.info(header)
+
+        df_metrics = pd.DataFrame()
+        df_report = pd.DataFrame()
+
+        for head_num, head in enumerate(results):
+            logger.info("\n _________ {} _________".format(head['task_name']))
+            for metric_name, metric_val in head.items():
+                # log with ML framework (e.g. Mlflow)
+                if logging:
+                    if not metric_name in ["preds","labels"] and not metric_name.startswith("_"):
+                        if isinstance(metric_val, numbers.Number):
+                            MlLogger.log_metrics(
+                                metrics={
+                                    f"{dataset_name}_{metric_name}_{head['task_name']}": metric_val
+                                },
+                                step=steps,
+                            )
+                # print via standard python logger
+                if print:
+                    if metric_name == "report":
+                        if isinstance(metric_val, str) and len(metric_val) > 8000:
+                            metric_val = metric_val[:7500] + "\n ............................. \n" + metric_val[-500:]
+                        logger.info("{}: \n {}".format(metric_name, metric_val))
+                    else:
+                        if not metric_name in ["preds", "labels"] and not metric_name.startswith("_"):
+                            logger.info("{}: {}".format(metric_name, metric_val))
+                # save results in pandas dataframe
+                if dframe:
+                    if metric_name == "report":
+                        report_data = []
+                        lines = metric_value.split('\n')
+                        for line in lines[2:-3]:
+                            row = {}
+                            row_data = line.split('      ')
+                            row['class'] = row_data[0]
+                            row['precision'] = float(row_data[1])
+                            row['recall'] = float(row_data[2])
+                            row['f1_score'] = float(row_data[3])
+                            row['support'] = float(row_data[4])
+                            report_data.append(row)
+                        df_report = df_report.append(report_data, ignore_index=True)
+                    else:
+                        if not metric_name in ["preds", "labels"] and not metric_name.startswith("_"):
+                            logger.info("{}: {}".format(metric_name, metric_val))
+                            row = {}
+                            row['metric_name'] = metric_name
+                            row['metric_value'] = metric_value
+                            df_report = df_report.append(row, ignore_index=True)
+
+        df_metrics.to_csv(save_dir + "/eval_metrics_" + dataset_name + "_epoch_" + epoch + "_step_" + steps + ".csv", index = False)
+        df_report.to_csv(save_dir + "/eval_report_" + dataset_name + "_epoch_" + epoch + "_step_" + steps + ".csv", index = False)
