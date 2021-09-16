@@ -20,7 +20,7 @@ class Evaluator:
     """Handles evaluation of a given model over a specified dataset."""
 
     def __init__(
-        self, data_loader, tasks, device, report=True
+        self, data_loader, tasks, device, eval_dir, report=True
     ):
         """
         :param data_loader: The PyTorch DataLoader that will return batches of data from the evaluation dataset
@@ -36,6 +36,7 @@ class Evaluator:
         self.data_loader = data_loader
         self.tasks = tasks
         self.device = device
+        self.eval_dir = eval_dir
         self.report = report
 
     def eval(self, model, return_preds_and_labels=False, calibrate_conf_scores=False):
@@ -178,7 +179,7 @@ class Evaluator:
                             logger.info("{}: {}".format(metric_name, metric_val))
 
     @staticmethod
-    def log_results(results, dataset_name, epoch, steps, logging, print, dframe, save_dir, num_fold=None):
+    def log_results(results, dataset_name, epoch, steps, logging, print, dframe, num_fold=None):
         # Print a header
         header = "\n\n"
         header += BUSH_SEP + "\n"
@@ -224,6 +225,8 @@ class Evaluator:
                         for line in lines[2:-3]:
                             row = {}
                             row_data = line.split('      ')
+                            row['epoch'] = epoch
+                            row['step'] = steps
                             row['class'] = row_data[0]
                             row['precision'] = float(row_data[1])
                             row['recall'] = float(row_data[2])
@@ -235,9 +238,11 @@ class Evaluator:
                         if not metric_name in ["preds", "labels"] and not metric_name.startswith("_"):
                             logger.info("{}: {}".format(metric_name, metric_val))
                             row = {}
+                            row['epoch'] = epoch
+                            row['step'] = steps
                             row['metric_name'] = metric_name
                             row['metric_value'] = metric_value
                             df_report = df_report.append(row, ignore_index=True)
-
-        df_metrics.to_csv(save_dir + "/eval_metrics_" + dataset_name + "_epoch_" + epoch + "_step_" + steps + ".csv", index = False)
-        df_report.to_csv(save_dir + "/eval_report_" + dataset_name + "_epoch_" + epoch + "_step_" + steps + ".csv", index = False)
+        if eval_dir:
+            df_metrics.to_csv(eval_dir + "/eval_metrics_" + dataset_name + ".csv", mode='a', header=not os.path.exists(eval_dir + "/eval_metrics_" + dataset_name + ".csv"))
+            df_report.to_csv(eval_dir + "/eval_report_" + dataset_name + ".csv", mode='a', header=not os.path.exists(eval_dir + "/eval_metrics_" + dataset_name + ".csv"))

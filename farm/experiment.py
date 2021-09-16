@@ -135,7 +135,8 @@ def run_experiment(args):
         lr_schedule=lr_schedule,
         evaluate_every=args.logging.eval_every,
         device=device,
-        early_stopping=early_stopping
+        early_stopping=early_stopping,
+        eval_dir=args.general.output_dir
     )
 
     model = trainer.train()

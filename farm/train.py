@@ -135,7 +135,8 @@ class Trainer:
         global_step=0,
         evaluator_test=True,
         disable_tqdm=False,
-        max_grad_norm=1.0
+        max_grad_norm=1.0,
+        eval_dir=None
     ):
         """
         :param optimizer: An optimizer object that determines the learning strategy to be used during training
@@ -190,6 +191,8 @@ class Trainer:
         :type disable_tqdm: bool
         :param max_grad_norm: Max gradient norm for clipping, default 1.0, set to None to disable
         :type max_grad_norm: float
+        :param eval_dir: directory where a csv containing the evaluation data will be created
+        :type eval_dir: str
         """
 
         self.model = model
@@ -211,6 +214,7 @@ class Trainer:
         self.log_loss_every = log_loss_every
         self.disable_tqdm = disable_tqdm
         self.max_grad_norm = max_grad_norm
+        self.eval_dir = eval_dir
         self.test_result = None
 
         if use_amp and not AMP_AVAILABLE:
@@ -312,12 +316,12 @@ class Trainer:
                     dev_data_loader = self.data_silo.get_data_loader("dev")
                     if dev_data_loader is not None:
                         evaluator_dev = Evaluator(
-                            data_loader=dev_data_loader, tasks=self.data_silo.processor.tasks, device=self.device, report=self.eval_report
+                            data_loader=dev_data_loader, tasks=self.data_silo.processor.tasks, device=self.device, eval_dir=self.eval_dir, report=self.eval_report
                         )
                         evalnr += 1
                         result = evaluator_dev.eval(self.model)
                         # evaluator_dev.log_results(result, "Dev", self.global_step)
-                        evaluator_dev.log_results(result, "Dev", epoch, step, True, False, True, self.save_dir)
+                        evaluator_dev.log_results(result, "Dev", epoch, step, True, False, True)
                         if self.early_stopping:
                             do_stopping, save_model, eval_value = self.early_stopping.check_stopping(result)
                             if save_model:
@@ -374,7 +378,7 @@ class Trainer:
                 )
                 self.test_result = evaluator_test.eval(self.model)
                 # evaluator_test.log_results(self.test_result, "Test", self.global_step)
-                evaluator_dev.log_results(self.test_result, "Test", 0, step, True, False, True, self.save_dir)
+                evaluator_dev.log_results(self.test_result, "Test", 0, step, True, False, True)
         return self.model
 
     def backward_propagate(self, loss, step):
