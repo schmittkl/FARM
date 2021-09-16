@@ -228,10 +228,10 @@ class Evaluator:
                             row['epoch'] = epoch
                             row['step'] = steps
                             row['class'] = row_data[0]
-                            row['precision'] = float(row_data[1])
-                            row['recall'] = float(row_data[2])
-                            row['f1_score'] = float(row_data[3])
-                            row['support'] = float(row_data[4])
+                            row['precision'] = row_data[1]
+                            row['recall'] = row_data[2]
+                            row['f1_score'] = row_data[3]
+                            row['support'] = row_data[4]
                             report_data.append(row)
                         df_report = df_report.append(report_data, ignore_index=True)
                     else:
