@@ -221,7 +221,7 @@ class Evaluator:
                 if dframe:
                     if metric_name == "report":
                         report_data = []
-                        lines = metric_value.split('\n')
+                        lines = metric_val.split('\n')
                         for line in lines[2:-3]:
                             row = {}
                             row_data = line.split('      ')
@@ -241,7 +241,7 @@ class Evaluator:
                             row['epoch'] = epoch
                             row['step'] = steps
                             row['metric_name'] = metric_name
-                            row['metric_value'] = metric_value
+                            row['metric_value'] = metric_val
                             df_report = df_report.append(row, ignore_index=True)
         if eval_dir:
             df_metrics.to_csv(eval_dir + "/eval_metrics_" + dataset_name + ".csv", mode='a', header=not os.path.exists(eval_dir + "/eval_metrics_" + dataset_name + ".csv"))

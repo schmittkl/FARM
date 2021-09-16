@@ -136,7 +136,7 @@ def run_experiment(args):
         evaluate_every=args.logging.eval_every,
         device=device,
         early_stopping=early_stopping,
-        eval_dir=args.general.output_dir
+        eval_dir=args.general.output_dir #TO DO: Put something else here
     )
 
     model = trainer.train()
