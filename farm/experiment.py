@@ -135,7 +135,10 @@ def run_experiment(args):
         lr_schedule=lr_schedule,
         evaluate_every=args.logging.eval_every,
         device=device,
-        early_stopping=early_stopping
+        early_stopping=early_stopping,
+        checkpoint_every=args.parameter.checkpoint_every,
+        checkpoint_root_dir=Path(args.parameter.checkpoint_root_dir),
+        checkpoints_to_keep=args.parameter.checkpoints_to_keep
     )
 
     model = trainer.train()
