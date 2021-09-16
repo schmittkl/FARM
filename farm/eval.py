@@ -220,20 +220,23 @@ class Evaluator:
                 # save results in pandas dataframe
                 if dframe:
                     if metric_name == "report":
-                        report_data = []
-                        lines = metric_val.split('\n')
-                        for line in lines[2:-3]:
-                            row = {}
-                            row_data = line.split('      ')
-                            row['epoch'] = epoch
-                            row['step'] = steps
-                            row['class'] = row_data[0]
-                            row['precision'] = row_data[1]
-                            row['recall'] = row_data[2]
-                            row['f1_score'] = row_data[3]
-                            row['support'] = row_data[4]
-                            report_data.append(row)
-                        df_report = df_report.append(report_data, ignore_index=True)
+                        try:
+                            report_data = []
+                            lines = metric_val.split('\n')
+                            for line in lines[2:-3]:
+                                row = {}
+                                row_data = line.split()
+                                row['epoch'] = epoch
+                                row['step'] = steps
+                                row['class'] = row_data[0]
+                                row['precision'] = row_data[1]
+                                row['recall'] = row_data[2]
+                                row['f1_score'] = row_data[3]
+                                row['support'] = row_data[4]
+                                report_data.append(row)
+                            df_report = df_report.append(report_data, ignore_index=True)
+                        except Exception:
+                            pass
                     else:
                         if not metric_name in ["preds", "labels"] and not metric_name.startswith("_"):
                             logger.info("{}: {}".format(metric_name, metric_val))
