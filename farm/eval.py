@@ -221,20 +221,36 @@ class Evaluator:
                 if dframe:
                     if metric_name == "report":
                         try:
-                            report_data = []
                             lines = metric_val.split('\n')
-                            for line in lines[2:-3]:
+                            for line in lines[2:]:
                                 row = {}
                                 row_data = line.split()
-                                row['epoch'] = epoch
-                                row['step'] = steps
-                                row['class'] = row_data[0]
-                                row['precision'] = row_data[1]
-                                row['recall'] = row_data[2]
-                                row['f1_score'] = row_data[3]
-                                row['support'] = row_data[4]
-                                report_data.append(row)
-                            df_report = df_report.append(report_data, ignore_index=True)
+                                if len(row_data) == 6:
+                                  row['epoch'] = epoch
+                                  row['step'] = steps
+                                  row['class'] = row_data[0] + " " + row_data[1]
+                                  row['precision'] = row_data[2]
+                                  row['recall'] = row_data[3]
+                                  row['f1_score'] = row_data[4]
+                                  row['support'] = row_data[5]
+                                  print(row)
+                                  df_report = df_report.append(row, ignore_index=True)
+                                elif len(row_data) > 4: 
+                                  row['epoch'] = epoch
+                                  row['step'] = steps
+                                  row['class'] = row_data[0]
+                                  row['precision'] = row_data[1]
+                                  row['recall'] = row_data[2]
+                                  row['f1_score'] = row_data[3]
+                                  row['support'] = row_data[4]
+                                  df_report = df_report.append(row, ignore_index=True)
+                                elif len(row_data) == 3:
+                                  row['epoch'] = epoch
+                                  row['step'] = steps
+                                  row['class'] = row_data[0]
+                                  row['f1_score'] = row_data[1]
+                                  row['support'] = row_data[2]
+                                  df_report = df_report.append(row, ignore_index=True)
                         except Exception:
                             pass
                     else:
@@ -250,8 +266,8 @@ class Evaluator:
             metrics_file = eval_dir + "/eval_metrics_" + dataset_name + ".csv"
             report_file = eval_dir + "/eval_report_" + dataset_name + ".csv"
             if Path(metrics_file).is_file():
-                df_metrics.to_csv(metrics_file, mode='a', header=False)
-                df_report.to_csv(report_file, mode='a', header=False)
+                df_metrics.to_csv(metrics_file, mode='a', header=False, index=False)
+                df_report.to_csv(report_file, mode='a', header=False, index=False)
             else:
-                df_metrics.to_csv(metrics_file, header=True)
-                df_report.to_csv(report_file, header=True)
+                df_metrics.to_csv(metrics_file, header=True, index=False)
+                df_report.to_csv(report_file, header=True, index=False)
