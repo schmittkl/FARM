@@ -5,6 +5,7 @@ import logging
 import pandas as pd
 import numpy as np
 from torch.utils.data import DataLoader
+from pathlib import Path
 
 from farm.evaluation.metrics import compute_metrics, compute_report_metrics
 from farm.utils import to_numpy
@@ -248,7 +249,7 @@ class Evaluator:
         if eval_dir:
             metrics_file = eval_dir + "/eval_metrics_" + dataset_name + ".csv"
             report_file = eval_dir + "/eval_report_" + dataset_name + ".csv"
-            if not os.path.exists(metrics_file):
+            if Path(metrics_file).is_file():
                 df_metrics.to_csv(metrics_file, header=True)
                 df_report.to_csv(report_file, header=True)
             else:
