@@ -44,6 +44,36 @@ def set_all_seeds(seed, deterministic_cudnn=False):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
+def set_all_seeds(random_seed, numpy_seed, torch_seed, hash_seed, cuda_seed, deterministic_cudnn=False):
+    """
+    Setting multiple seeds to make runs reproducible.
+
+    Important: Enabling `deterministic_cudnn` gives you full reproducibility with CUDA,
+    but might slow down your training (see https://pytorch.org/docs/stable/notes/randomness.html#cudnn) !
+
+    :param random_seed:number to use as seed for random
+    :type random_seed: int
+    :param numpy_seed:number to use as seed for numpy.random
+    :type numpy_seed: int
+    :param torch_seed:number to use as seed for torch
+    :type torch_seed: int
+    :param hash_seed:number to use as seed for PYTHONHASHSEED
+    :type hash_seed: int
+    :param cuda_seed:number to use as seed for cuda
+    :type cuda_seed: int
+    :param deterministic_torch: Enable for full reproducibility when using CUDA. Caution: might slow down training.
+    :type deterministic_cudnn: bool
+    :return: None
+    """
+    random.seed(random_seed)
+    np.random.seed(numpy_seed)
+    torch.manual_seed(torch_seed)
+    os.environ['PYTHONHASHSEED'] = str(hash_seed)
+    torch.cuda.manual_seed_all(cuda_seed)
+    if deterministic_cudnn:
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
 
 def calc_chunksize(num_dicts, min_chunksize=4, max_chunksize=2000, max_processes=128):
     if mp.cpu_count() > 3:

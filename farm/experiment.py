@@ -55,7 +55,7 @@ def run_experiment(args):
         args.parameter.batch_size // args.parameter.gradient_accumulation_steps
     )
 
-    set_all_seeds(args.general.seed)
+    set_all_seeds(args.general.random_seed, args.general.numpy_seed, args.general.torch_seed, args.general.hash_seed, args.general.cuda_seed)
 
     # Prepare Data
     tokenizer = Tokenizer.load(
