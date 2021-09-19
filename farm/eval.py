@@ -250,8 +250,8 @@ class Evaluator:
             metrics_file = eval_dir + "/eval_metrics_" + dataset_name + ".csv"
             report_file = eval_dir + "/eval_report_" + dataset_name + ".csv"
             if Path(metrics_file).is_file():
-                df_metrics.to_csv(metrics_file, header=True)
-                df_report.to_csv(report_file, header=True)
-            else:
                 df_metrics.to_csv(metrics_file, mode='a', header=False)
                 df_report.to_csv(report_file, mode='a', header=False)
+            else:
+                df_metrics.to_csv(metrics_file, header=True)
+                df_report.to_csv(report_file, header=True)
