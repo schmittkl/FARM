@@ -179,7 +179,7 @@ class Evaluator:
                             logger.info("{}: {}".format(metric_name, metric_val))
 
     @staticmethod
-    def log_results(results, dataset_name, epoch, steps, logging, print, dframe, num_fold=None):
+    def log_results(results, dataset_name, epoch, steps, logging=False, print=True, dframe=True, num_fold=None):
         # Print a header
         header = "\n\n"
         header += BUSH_SEP + "\n"
@@ -245,7 +245,13 @@ class Evaluator:
                             row['step'] = steps
                             row['metric_name'] = metric_name
                             row['metric_value'] = metric_val
-                            df_report = df_report.append(row, ignore_index=True)
-        if eval_dir:
-            df_metrics.to_csv(eval_dir + "/eval_metrics_" + dataset_name + ".csv", mode='a', header=not os.path.exists(eval_dir + "/eval_metrics_" + dataset_name + ".csv"))
-            df_report.to_csv(eval_dir + "/eval_report_" + dataset_name + ".csv", mode='a', header=not os.path.exists(eval_dir + "/eval_metrics_" + dataset_name + ".csv"))
+                            df_metrics = df_metrics.append(row, ignore_index=True)
+        if self.eval_dir:
+            metrics_file = self.eval_dir + "/eval_metrics_" + dataset_name + ".csv"
+            report_file = self.eval_dir + "/eval_report_" + dataset_name + ".csv"
+            if not os.path.exists(metrics_file):
+                df_metrics.to_csv(metrics_file, header=True)
+                df_report.to_csv(report_file, header=True)
+            else:
+                df_metrics.to_csv(metrics_file, mode='a', header=False)
+                df_report.to_csv(report_file, mode='a', header=False)
