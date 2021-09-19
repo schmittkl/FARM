@@ -316,12 +316,12 @@ class Trainer:
                     dev_data_loader = self.data_silo.get_data_loader("dev")
                     if dev_data_loader is not None:
                         evaluator_dev = Evaluator(
-                            data_loader=dev_data_loader, tasks=self.data_silo.processor.tasks, device=self.device, eval_dir=self.eval_dir, report=self.eval_report
+                            data_loader=dev_data_loader, tasks=self.data_silo.processor.tasks, device=self.device, report=self.eval_report
                         )
                         evalnr += 1
                         result = evaluator_dev.eval(self.model)
                         # evaluator_dev.log_results(result, "Dev", self.global_step)
-                        evaluator_dev.log_results(result, "Dev", epoch, step)
+                        evaluator_dev.log_results(self.eval_dir, result, "Dev", epoch, step)
                         if self.early_stopping:
                             do_stopping, save_model, eval_value = self.early_stopping.check_stopping(result)
                             if save_model:
@@ -378,7 +378,7 @@ class Trainer:
                 )
                 self.test_result = evaluator_test.eval(self.model)
                 # evaluator_test.log_results(self.test_result, "Test", self.global_step)
-                evaluator_dev.log_results(self.test_result, "Test", 0, step)
+                evaluator_dev.log_results(self.eval_dir, self.test_result, "Test", 0, step)
         return self.model
 
     def backward_propagate(self, loss, step):

@@ -20,7 +20,7 @@ class Evaluator:
     """Handles evaluation of a given model over a specified dataset."""
 
     def __init__(
-        self, data_loader, tasks, device, eval_dir, report=True
+        self, data_loader, tasks, device, report=True
     ):
         """
         :param data_loader: The PyTorch DataLoader that will return batches of data from the evaluation dataset
@@ -36,7 +36,6 @@ class Evaluator:
         self.data_loader = data_loader
         self.tasks = tasks
         self.device = device
-        self.eval_dir = eval_dir
         self.report = report
 
     def eval(self, model, return_preds_and_labels=False, calibrate_conf_scores=False):
@@ -179,7 +178,7 @@ class Evaluator:
                             logger.info("{}: {}".format(metric_name, metric_val))
 
     @staticmethod
-    def log_results(results, dataset_name, epoch, steps, logging=False, print=True, dframe=True, num_fold=None):
+    def log_results(eval_dir, results, dataset_name, epoch, steps, logging=False, print=True, dframe=True, num_fold=None):
         # Print a header
         header = "\n\n"
         header += BUSH_SEP + "\n"
@@ -246,9 +245,9 @@ class Evaluator:
                             row['metric_name'] = metric_name
                             row['metric_value'] = metric_val
                             df_metrics = df_metrics.append(row, ignore_index=True)
-        if self.eval_dir:
-            metrics_file = self.eval_dir + "/eval_metrics_" + dataset_name + ".csv"
-            report_file = self.eval_dir + "/eval_report_" + dataset_name + ".csv"
+        if eval_dir:
+            metrics_file = eval_dir + "/eval_metrics_" + dataset_name + ".csv"
+            report_file = eval_dir + "/eval_report_" + dataset_name + ".csv"
             if not os.path.exists(metrics_file):
                 df_metrics.to_csv(metrics_file, header=True)
                 df_report.to_csv(report_file, header=True)
