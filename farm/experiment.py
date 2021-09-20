@@ -73,6 +73,8 @@ def run_experiment(args):
         processor=processor,
         batch_size=args.parameter.batch_size,
         distributed=distributed,
+        strat_shuff_split=args.general.strat_shuff_split,
+        shuffle_split=args.general.shuffle_split,
     )
 
     class_weights = None
