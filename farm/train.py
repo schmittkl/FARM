@@ -6,6 +6,7 @@ from tqdm import tqdm
 import numpy
 import shutil
 import dill
+from pandas import DataFrame
 
 from farm.utils import MLFlowLogger as MlLogger
 from farm.utils import GracefulKiller, set_all_seeds
@@ -325,6 +326,7 @@ class Trainer:
                                         self.early_stopping.save_dir, eval_value))
                                 self.model.save(self.early_stopping.save_dir)
                                 self.data_silo.processor.save(self.early_stopping.save_dir)
+                                self._save_hyperparameters(self, self.early_stopping.save_dir)
                             if do_stopping:
                                 # log the stopping
                                 logger.info("STOPPING EARLY AT EPOCH {}, STEP {}, EVALUATION {}".format(epoch, step, evalnr))
@@ -568,6 +570,8 @@ class Trainer:
             pickle_module=dill,
         )
 
+        self._save_hyperparameters(self, checkpoint_path)
+
         checkpoint_name = f"epoch_{self.from_epoch}_step_{self.from_step-1}"
         checkpoint_path.replace(Path(checkpoint_path.parent) / checkpoint_name)
 
@@ -630,3 +634,28 @@ class Trainer:
             return False
         else:
             return True
+
+    def _save_hyperparameters(self, save_dir):
+        df = DataFrame()
+
+        df = df_metrics.append(["parameter_name", "parameter_value"], ignore_index=True)
+        
+        df = df_metrics.append(["dev_split", self.data_silo.processor.dev_split], ignore_index=True)
+        df = df_metrics.append(["max_seq_len"], self.data_silo.processor.max_seq_len, ignore_index=True)
+        df = df_metrics.append(["batch_size", self.data_silo.batch_size], ignore_index=True)
+
+        if self.early_stopping:
+            df = df_metrics.append(["early_stopping_metric", self.early_stopping.metric], ignore_index=True)
+            df = df_metrics.append(["early_stopping_mode", self.early_stopping.mode], ignore_index=True)
+            df = df_metrics.append(["early_stopping_patience", self.early_stopping.patience], ignore_index=True)
+
+        df = df_metrics.append(["lm_output_type", self.model.lm_output_type], ignore_index=True)
+        df = df_metrics.append(["layer_dims", self.model.layer_dims], ignore_index=True)
+        df = df_metrics.append(["class_weights", self.model.class_weights], ignore_index=True)
+
+        df = df_metrics.append(["optimizer_opts", self.optimizer.optimizer_opts], ignore_index=True)
+        df = df_metrics.append(["schedule_opts", self.optimizer.schedule_opts], ignore_index=True)
+
+        df.to_feather(save_dir)
+        
+
