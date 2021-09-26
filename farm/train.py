@@ -136,7 +136,9 @@ class Trainer:
         evaluator_test=True,
         disable_tqdm=False,
         max_grad_norm=1.0,
-        eval_dir=None
+        eval_dir=None,
+        eval_logging=True,
+        mlflow_logging=False
     ):
         """
         :param optimizer: An optimizer object that determines the learning strategy to be used during training
@@ -215,6 +217,8 @@ class Trainer:
         self.disable_tqdm = disable_tqdm
         self.max_grad_norm = max_grad_norm
         self.eval_dir = eval_dir
+        self.do_eval_logging = eval_logging
+        self.do_mlflow_logging = mlflow_logging
         self.test_result = None
 
         if use_amp and not AMP_AVAILABLE:
@@ -321,7 +325,7 @@ class Trainer:
                         evalnr += 1
                         result = evaluator_dev.eval(self.model)
                         # evaluator_dev.log_results(result, "Dev", self.global_step)
-                        evaluator_dev.log_results(self.eval_dir, result, "Dev", epoch, step)
+                        evaluator_dev.log_results(self.eval_dir, result, "Dev", epoch, step, logging=self.do_mlflow_logging, dframe=self.do_eval_logging)
                         if self.early_stopping:
                             do_stopping, save_model, eval_value = self.early_stopping.check_stopping(result)
                             if save_model:
@@ -378,7 +382,7 @@ class Trainer:
                 )
                 self.test_result = evaluator_test.eval(self.model)
                 # evaluator_test.log_results(self.test_result, "Test", self.global_step)
-                evaluator_dev.log_results(self.eval_dir, self.test_result, "Test", 0, step)
+                evaluator_dev.log_results(self.eval_dir, self.test_result, "Test", 0, step, logging=self.do_mlflow_logging, dframe=self.do_eval_logging)
         return self.model
 
     def backward_propagate(self, loss, step):
