@@ -48,8 +48,8 @@ class DataSilo:
         max_processes=128,
         caching=False,
         cache_path=Path("cache/data_silo"),
-        strat_shuff_split=0.1,
-        shuffle_split=0.1
+        strat_shuff_split=None,
+        shuffle_split=None
     ):
         """
         :param processor: A dataset specific Processor object which will turn input (file or dict) into a Pytorch Dataset.
@@ -102,6 +102,13 @@ class DataSilo:
             if max_processes != 1:
                 logger.warning("Multiprocessing not efficient for WordEmbedding Tokenizers. Please set max_process \n"
                             "argument in DataSilo to 1.")
+
+        # when the random values for splitting are not supplied, use previous approach
+        if self.strat_shuff_split is None:
+            self.strat_shuff_split = self.processor.dev_split
+
+        if self.shuffle_split is None:
+            self.shuffle_split = self.processor.dev_split
 
         loaded_from_cache = False
         if self.caching:  # Check if DataSets are present in cache
