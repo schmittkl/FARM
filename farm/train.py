@@ -649,11 +649,11 @@ class Trainer:
             df = df.append(["early_stopping_mode", self.early_stopping.mode], ignore_index=True)
             df = df.append(["early_stopping_patience", self.early_stopping.patience], ignore_index=True)
 
-        df = df.append(["layer_dims", self.model.layer_dims], ignore_index=True)
-        df = df.append(["class_weights", self.model.class_weights], ignore_index=True)
+        if self.optimizer.optimizer_opts:
+            df = df.append(["optimizer_opts", self.optimizer.optimizer_opts], ignore_index=True)
 
-        df = df.append(["optimizer_opts", self.optimizer.optimizer_opts], ignore_index=True)
-        df = df.append(["schedule_opts", self.optimizer.schedule_opts], ignore_index=True)
+        if self.optimizer.schedule_opts:
+            df = df.append(["schedule_opts", self.optimizer.schedule_opts], ignore_index=True)
 
         df.to_feather(save_dir)
         
