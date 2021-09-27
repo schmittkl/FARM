@@ -326,7 +326,7 @@ class Trainer:
                                         self.early_stopping.save_dir, eval_value))
                                 self.model.save(self.early_stopping.save_dir)
                                 self.data_silo.processor.save(self.early_stopping.save_dir)
-                                self._save_hyperparameters(self, self.early_stopping.save_dir)
+                                self._save_hyperparameters(self.early_stopping.save_dir)
                             if do_stopping:
                                 # log the stopping
                                 logger.info("STOPPING EARLY AT EPOCH {}, STEP {}, EVALUATION {}".format(epoch, step, evalnr))
@@ -570,7 +570,7 @@ class Trainer:
             pickle_module=dill,
         )
 
-        self._save_hyperparameters(self, checkpoint_path)
+        self._save_hyperparameters(checkpoint_path)
 
         checkpoint_name = f"epoch_{self.from_epoch}_step_{self.from_step-1}"
         checkpoint_path.replace(Path(checkpoint_path.parent) / checkpoint_name)
