@@ -636,26 +636,29 @@ class Trainer:
             return True
 
     def _save_hyperparameters(self, save_dir):
-        df = DataFrame()
+        try:
+            df = DataFrame()
 
-        df = df.append(["parameter_name", "parameter_value"], ignore_index=True)
+            df = df.append(["parameter_name", "parameter_value"], ignore_index=True)
         
-        df = df.append(["dev_split", self.data_silo.processor.dev_split], ignore_index=True)
-        df = df.append(["max_seq_len", self.data_silo.processor.max_seq_len], ignore_index=True)
-        df = df.append(["batch_size", self.data_silo.batch_size], ignore_index=True)
+            df = df.append(["dev_split", self.data_silo.processor.dev_split], ignore_index=True)
+            df = df.append(["max_seq_len", self.data_silo.processor.max_seq_len], ignore_index=True)
+            df = df.append(["batch_size", self.data_silo.batch_size], ignore_index=True)
 
-        if self.early_stopping:
-            df = df.append(["early_stopping_metric", self.early_stopping.metric], ignore_index=True)
-            df = df.append(["early_stopping_mode", self.early_stopping.mode], ignore_index=True)
-            df = df.append(["early_stopping_patience", self.early_stopping.patience], ignore_index=True)
+            if self.early_stopping:
+                df = df.append(["early_stopping_metric", self.early_stopping.metric], ignore_index=True)
+                df = df.append(["early_stopping_mode", self.early_stopping.mode], ignore_index=True)
+                df = df.append(["early_stopping_patience", self.early_stopping.patience], ignore_index=True)
 
-        df = df.append(["lm_output_type", self.model.lm_output_type], ignore_index=True)
-        df = df.append(["layer_dims", self.model.layer_dims], ignore_index=True)
-        df = df.append(["class_weights", self.model.class_weights], ignore_index=True)
+            df = df.append(["layer_dims", self.model.layer_dims], ignore_index=True)
+            df = df.append(["class_weights", self.model.class_weights], ignore_index=True)
 
-        df = df.append(["optimizer_opts", self.optimizer.optimizer_opts], ignore_index=True)
-        df = df.append(["schedule_opts", self.optimizer.schedule_opts], ignore_index=True)
+            df = df.append(["optimizer_opts", self.optimizer.optimizer_opts], ignore_index=True)
+            df = df.append(["schedule_opts", self.optimizer.schedule_opts], ignore_index=True)
 
-        df.to_feather(save_dir)
+            df.to_feather(save_dir)
+
+        except ModuleAttributeError:
+            print("Attribute Error")
         
 
