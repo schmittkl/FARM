@@ -641,7 +641,7 @@ class Trainer:
         df = df.append(["parameter_name", "parameter_value"], ignore_index=True)
         
         df = df.append(["dev_split", self.data_silo.processor.dev_split], ignore_index=True)
-        df = df.append(["max_seq_len"], self.data_silo.processor.max_seq_len, ignore_index=True)
+        df = df.append(["max_seq_len", self.data_silo.processor.max_seq_len], ignore_index=True)
         df = df.append(["batch_size", self.data_silo.batch_size], ignore_index=True)
 
         if self.early_stopping:
