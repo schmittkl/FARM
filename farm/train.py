@@ -636,10 +636,10 @@ class Trainer:
             return True
 
     def _save_hyperparameters(self, save_dir):
-        df = DataFrame()
+        df = DataFrame(columns=["parameter", "value"])
 
         try:
-            df = df.append(["parameter_name", "parameter_value"], ignore_index=True)
+            #df = df.append(["parameter_name", "parameter_value"], ignore_index=True)
         
             df = df.append(["dev_split", self.data_silo.processor.dev_split], ignore_index=True)
             df = df.append(["max_seq_len", self.data_silo.processor.max_seq_len], ignore_index=True)
