@@ -638,22 +638,23 @@ class Trainer:
     def _save_hyperparameters(self, save_dir):
         df = DataFrame()
 
-        df = df.append(["parameter_name", "parameter_value"], ignore_index=True)
+        try:
+            df = df.append(["parameter_name", "parameter_value"], ignore_index=True)
         
-        df = df.append(["dev_split", self.data_silo.processor.dev_split], ignore_index=True)
-        df = df.append(["max_seq_len", self.data_silo.processor.max_seq_len], ignore_index=True)
-        df = df.append(["batch_size", self.data_silo.batch_size], ignore_index=True)
+            df = df.append(["dev_split", self.data_silo.processor.dev_split], ignore_index=True)
+            df = df.append(["max_seq_len", self.data_silo.processor.max_seq_len], ignore_index=True)
+            df = df.append(["batch_size", self.data_silo.batch_size], ignore_index=True)
 
-        if self.early_stopping:
-            df = df.append(["early_stopping_metric", self.early_stopping.metric], ignore_index=True)
-            df = df.append(["early_stopping_mode", self.early_stopping.mode], ignore_index=True)
-            df = df.append(["early_stopping_patience", self.early_stopping.patience], ignore_index=True)
+            if self.early_stopping:
+                df = df.append(["early_stopping_metric", self.early_stopping.metric], ignore_index=True)
+                df = df.append(["early_stopping_mode", self.early_stopping.mode], ignore_index=True)
+                df = df.append(["early_stopping_patience", self.early_stopping.patience], ignore_index=True)
 
-        if self.optimizer.optimizer_opts:
             df = df.append(["optimizer_opts", self.optimizer.optimizer_opts], ignore_index=True)
-
-        if self.optimizer.schedule_opts:
             df = df.append(["schedule_opts", self.optimizer.schedule_opts], ignore_index=True)
+
+        except AttributeError:
+            print("AttributeError occured")
 
         df.to_feather(save_dir)
         
