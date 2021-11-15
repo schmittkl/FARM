@@ -128,7 +128,7 @@ def run_experiment(args):
     if args.parameter.checkpoint_every:
         # checkpoint_every = 0 means that we do a checkpoint at the start of each epoch
         if args.parameter.checkpoint_every == 0:
-            checkpoint_every = ceil(data_silo.n_samples(data_silo, "train") / args.parameter.batch_size)
+            checkpoint_every = ceil(data_silo.n_samples("train") / args.parameter.batch_size)
         else:
             checkpoint_every = args.parameter.checkpoint_every
 
