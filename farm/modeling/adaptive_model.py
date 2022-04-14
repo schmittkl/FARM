@@ -621,7 +621,7 @@ class AdaptiveModel(nn.Module, BaseAdaptiveModel):
                 hidden_size=config.hidden_size
             )
             optimized_model.convert_model_float32_to_float16()
-            optimized_model.save_model_to_file("model.onnx")
+            optimized_model.save_model_to_file(str(output_path/"model.onnx"))
 
         if quantize:
             quantize_model(output_path/"model.onnx")
@@ -637,6 +637,7 @@ class ONNXAdaptiveModel(BaseAdaptiveModel):
     For inference, this class is compatible with the FARM Inferencer.
     """
     def __init__(self, onnx_session, language_model_class, language, prediction_heads, device):
+        import onnxruntime
         if str(device) == "cuda" and onnxruntime.get_device() != "GPU":
             raise Exception(f"Device {device} not available for Inference. For CPU, run pip install onnxruntime and"
                             f"for GPU run pip install onnxruntime-gpu")
