@@ -135,7 +135,10 @@ def run_experiment(args):
         lr_schedule=lr_schedule,
         evaluate_every=args.logging.eval_every,
         device=device,
-        early_stopping=early_stopping
+        early_stopping=early_stopping,
+        eval_dir=args.logging.eval_dir if args.logging.eval_dir else None,
+        eval_logging=args.logging.eval_logging if args.logging.eval_logging else False,
+        mlflow_logging=args.logging.mlflow_logging if args.logging.mlflow_logging else True
     )
 
     model = trainer.train()
