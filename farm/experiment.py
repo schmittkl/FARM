@@ -13,6 +13,8 @@ from farm.utils import set_all_seeds, initialize_device_settings
 from farm.utils import MLFlowLogger as MlLogger
 from farm.file_utils import read_config, unnestConfig
 
+from math import ceil
+
 logger = logging.getLogger(__name__)
 
 logging.basicConfig(
@@ -125,23 +127,51 @@ def run_experiment(args):
     else:
         early_stopping = None
 
-    trainer = Trainer(
-        model=model,
-        optimizer=optimizer,
-        data_silo=data_silo,
-        epochs=args.parameter.epochs,
-        n_gpu=n_gpu,
-        grad_acc_steps=args.parameter.gradient_accumulation_steps,
-        use_amp=args.general.use_amp,
-        local_rank=args.general.local_rank,
-        lr_schedule=lr_schedule,
-        evaluate_every=args.logging.eval_every,
-        device=device,
-        early_stopping=early_stopping,
-        eval_dir=args.logging.eval_dir if args.logging.eval_dir else None,
-        eval_logging=args.logging.eval_logging if args.logging.eval_logging else False,
-        mlflow_logging=args.logging.mlflow_logging if args.logging.mlflow_logging else True
-    )
+    if args.parameter.checkpoint_every:
+        # checkpoint_every = 0 means that we do a checkpoint at the start of each epoch
+        if args.parameter.checkpoint_every == 0:
+            checkpoint_every = ceil(data_silo.n_samples("train") / args.parameter.batch_size)
+        else:
+            checkpoint_every = args.parameter.checkpoint_every
+
+        trainer = Trainer(
+            model=model,
+            optimizer=optimizer,
+            data_silo=data_silo,
+            epochs=args.parameter.epochs,
+            n_gpu=n_gpu,
+            grad_acc_steps=args.parameter.gradient_accumulation_steps,
+            use_amp=args.general.use_amp,
+            local_rank=args.general.local_rank,
+            lr_schedule=lr_schedule,
+            evaluate_every=args.logging.eval_every,
+            device=device,
+            early_stopping=early_stopping,
+            checkpoint_every=checkpoint_every,
+            checkpoint_root_dir=Path(args.parameter.checkpoint_root_dir),
+            checkpoints_to_keep=args.parameter.checkpoints_to_keep,
+            eval_dir=args.logging.eval_dir if args.logging.eval_dir else None,
+            eval_logging=args.logging.eval_logging if args.logging.eval_logging else False,
+            mlflow_logging=args.logging.mlflow_logging if args.logging.mlflow_logging else True
+        )
+    else:
+        trainer = Trainer(
+            model=model,
+            optimizer=optimizer,
+            data_silo=data_silo,
+            epochs=args.parameter.epochs,
+            n_gpu=n_gpu,
+            grad_acc_steps=args.parameter.gradient_accumulation_steps,
+            use_amp=args.general.use_amp,
+            local_rank=args.general.local_rank,
+            lr_schedule=lr_schedule,
+            evaluate_every=args.logging.eval_every,
+            device=device,
+            early_stopping=early_stopping,
+            eval_dir=args.logging.eval_dir if args.logging.eval_dir else None,
+            eval_logging=args.logging.eval_logging if args.logging.eval_logging else False,
+            mlflow_logging=args.logging.mlflow_logging if args.logging.mlflow_logging else True
+        )
 
     model = trainer.train()
 
