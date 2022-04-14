@@ -75,6 +75,8 @@ def run_experiment(args):
         processor=processor,
         batch_size=args.parameter.batch_size,
         distributed=distributed,
+        strat_shuff_split=args.general.strat_shuff_split if args.general.strat_shuff_split else None,
+        shuffle_split=args.general.shuffle_split if args.general.shuffle_split else None,
     )
 
     class_weights = None
@@ -147,7 +149,10 @@ def run_experiment(args):
             early_stopping=early_stopping,
             checkpoint_every=checkpoint_every,
             checkpoint_root_dir=Path(args.parameter.checkpoint_root_dir),
-            checkpoints_to_keep=args.parameter.checkpoints_to_keep
+            checkpoints_to_keep=args.parameter.checkpoints_to_keep,
+            eval_dir=args.logging.eval_dir if args.logging.eval_dir else None,
+            eval_logging=args.logging.eval_logging if args.logging.eval_logging else False,
+            mlflow_logging=args.logging.mlflow_logging if args.logging.mlflow_logging else True
         )
     else:
         trainer = Trainer(
@@ -162,7 +167,10 @@ def run_experiment(args):
             lr_schedule=lr_schedule,
             evaluate_every=args.logging.eval_every,
             device=device,
-            early_stopping=early_stopping
+            early_stopping=early_stopping,
+            eval_dir=args.logging.eval_dir if args.logging.eval_dir else None,
+            eval_logging=args.logging.eval_logging if args.logging.eval_logging else False,
+            mlflow_logging=args.logging.mlflow_logging if args.logging.mlflow_logging else True
         )
 
     model = trainer.train()

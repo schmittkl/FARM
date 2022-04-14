@@ -6,6 +6,7 @@ from tqdm import tqdm
 import numpy
 import shutil
 import dill
+from pandas import DataFrame
 
 from farm.utils import MLFlowLogger as MlLogger
 from farm.utils import GracefulKiller, set_all_seeds
@@ -135,7 +136,10 @@ class Trainer:
         global_step=0,
         evaluator_test=True,
         disable_tqdm=False,
-        max_grad_norm=1.0
+        max_grad_norm=1.0,
+        eval_dir=None,
+        eval_logging=True,
+        mlflow_logging=False
     ):
         """
         :param optimizer: An optimizer object that determines the learning strategy to be used during training
@@ -190,6 +194,8 @@ class Trainer:
         :type disable_tqdm: bool
         :param max_grad_norm: Max gradient norm for clipping, default 1.0, set to None to disable
         :type max_grad_norm: float
+        :param eval_dir: directory where a csv containing the evaluation data will be created
+        :type eval_dir: str
         """
 
         self.model = model
@@ -211,6 +217,9 @@ class Trainer:
         self.log_loss_every = log_loss_every
         self.disable_tqdm = disable_tqdm
         self.max_grad_norm = max_grad_norm
+        self.eval_dir = eval_dir
+        self.do_eval_logging = eval_logging
+        self.do_mlflow_logging = mlflow_logging
         self.test_result = None
 
         if use_amp and not AMP_AVAILABLE:
@@ -316,7 +325,8 @@ class Trainer:
                         )
                         evalnr += 1
                         result = evaluator_dev.eval(self.model)
-                        evaluator_dev.log_results(result, "Dev", self.global_step)
+                        # evaluator_dev.log_results(result, "Dev", self.global_step)
+                        evaluator_dev.log_results(self.eval_dir, result, "Dev", epoch, step, logging=self.do_mlflow_logging, dframe=self.do_eval_logging)
                         if self.early_stopping:
                             do_stopping, save_model, eval_value = self.early_stopping.check_stopping(result)
                             if save_model:
@@ -325,6 +335,7 @@ class Trainer:
                                         self.early_stopping.save_dir, eval_value))
                                 self.model.save(self.early_stopping.save_dir)
                                 self.data_silo.processor.save(self.early_stopping.save_dir)
+                                self._save_hyperparameters(self.early_stopping.save_dir)
                             if do_stopping:
                                 # log the stopping
                                 logger.info("STOPPING EARLY AT EPOCH {}, STEP {}, EVALUATION {}".format(epoch, step, evalnr))
@@ -372,7 +383,8 @@ class Trainer:
                     data_loader=test_data_loader, tasks=self.data_silo.processor.tasks, device=self.device
                 )
                 self.test_result = evaluator_test.eval(self.model)
-                evaluator_test.log_results(self.test_result, "Test", self.global_step)
+                # evaluator_test.log_results(self.test_result, "Test", self.global_step)
+                evaluator_dev.log_results(self.eval_dir, self.test_result, "Test", 0, step, logging=self.do_mlflow_logging, dframe=self.do_eval_logging)
         return self.model
 
     def backward_propagate(self, loss, step):
@@ -568,6 +580,8 @@ class Trainer:
             pickle_module=dill,
         )
 
+        self._save_hyperparameters(checkpoint_path)
+
         checkpoint_name = f"epoch_{self.from_epoch}_step_{self.from_step-1}"
         checkpoint_path.replace(Path(checkpoint_path.parent) / checkpoint_name)
 
@@ -630,3 +644,25 @@ class Trainer:
             return False
         else:
             return True
+
+    def _save_hyperparameters(self, save_dir):
+        df = DataFrame(columns=["parameter", "value"])
+
+        try:
+            df = df.append(["parameter_name", "parameter_value"], ignore_index=True)
+        
+            df = df.append(["dev_split", self.data_silo.processor.dev_split], ignore_index=True)
+            df = df.append(["max_seq_len", self.data_silo.processor.max_seq_len], ignore_index=True)
+            df = df.append(["batch_size", self.data_silo.batch_size], ignore_index=True)
+
+            if self.early_stopping:
+                df = df.append(["early_stopping_metric", self.early_stopping.metric], ignore_index=True)
+                df = df.append(["early_stopping_mode", self.early_stopping.mode], ignore_index=True)
+                df = df.append(["early_stopping_patience", self.early_stopping.patience], ignore_index=True)
+
+        except AttributeError:
+            print("AttributeError occured")
+
+        df.to_csv(save_dir)
+        
+
