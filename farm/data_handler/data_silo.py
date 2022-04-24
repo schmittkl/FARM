@@ -576,7 +576,7 @@ class DataSilo:
         max_seq_len = [q_max_seq_len, p_max_seq_len]
         return clipped, ave_len, seq_lens, max_seq_len
 
-    def calculate_class_weights(self, task_name, source="train"):
+    def calculate_class_weights(self, task_name, weights=None, source="train"):
         """ For imbalanced datasets, we can calculate class weights that can be used later in the
         loss function of the prediction head to upweight the loss of minorities.
 
@@ -603,7 +603,10 @@ class DataSilo:
                 observed_labels += [label_list[x[tensor_idx].item()] for x in dataset]
 
         #TODO scale e.g. via logarithm to avoid crazy spikes for rare classes
-        class_weights = compute_class_weight("balanced", classes=np.asarray(label_list), y=observed_labels)
+        if weights is not None:
+            class_weights = compute_class_weight(weights, classes=np.asarray(label_list), y=observed_labels)
+        else:
+            class_weights = compute_class_weight("balanced", classes=np.asarray(label_list), y=observed_labels)
 
         # conversion necessary to have class weights of same type as model weights
         class_weights = class_weights.astype(np.float32)
