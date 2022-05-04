@@ -80,13 +80,14 @@ def run_experiment(args):
     )
 
     class_weights = None
-    if args.parameter.balance_classes is not None:
-        if (isinstance(x, bool) and x) or isinstance(x, dict):
+    param_cw = args.parameter.balance_classes
+    if param_cw is not None:
+        if (isinstance(param_cw, bool) and param_cw) or isinstance(param_cw, dict):
             task_names = list(processor.tasks.keys())
             if len(task_names) > 1:
                 raise NotImplementedError(f"Balancing classes is currently not supported for multitask experiments. Got tasks:  {task_names} ")
-            if isinstance(x, dict):
-                class_weights = data_silo.calculate_class_weights(task_name=task_names[0], weights=args.parameter.balance_classes)
+            if isinstance(param_cw, dict):
+                class_weights = data_silo.calculate_class_weights(task_name=task_names[0], weights=param_cw)
             else:
                 class_weights = data_silo.calculate_class_weights(task_name=task_names[0])
 
