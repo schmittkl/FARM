@@ -665,6 +665,4 @@ class Trainer:
             print("AttributeError occured")
 
         df.to_csv(os.path.join(save_dir, "hyperparameters.csv"))
-)
-        
 
