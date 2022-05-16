@@ -7,6 +7,7 @@ import numpy
 import shutil
 import dill
 from pandas import DataFrame
+import os
 
 from farm.utils import MLFlowLogger as MlLogger
 from farm.utils import GracefulKiller, set_all_seeds
@@ -663,6 +664,7 @@ class Trainer:
         except AttributeError:
             print("AttributeError occured")
 
-        df.to_csv(save_dir + "/hyperparameters.csv")
+        df.to_csv(os.path.join(save_dir, "hyperparameters.csv"))
+)
         
 
