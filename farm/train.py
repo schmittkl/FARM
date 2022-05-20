@@ -650,19 +650,17 @@ class Trainer:
         df = DataFrame(columns=["parameter", "value"])
 
         try:
-            df = df.append(["parameter_name", "parameter_value"], ignore_index=True)
-        
-            df = df.append(["dev_split", self.data_silo.processor.dev_split], ignore_index=True)
-            df = df.append(["max_seq_len", self.data_silo.processor.max_seq_len], ignore_index=True)
-            df = df.append(["batch_size", self.data_silo.batch_size], ignore_index=True)
+            df = df.append({"parameter": "dev_split", "value": self.data_silo.processor.dev_split}, ignore_index=True)
+            df = df.append({"parameter": "max_seq_len", "value": self.data_silo.processor.max_seq_len}, ignore_index=True)
+            df = df.append({"parameter": "batch_size", "value": self.data_silo.batch_size}, ignore_index=True)
 
             if self.early_stopping:
-                df = df.append(["early_stopping_metric", self.early_stopping.metric], ignore_index=True)
-                df = df.append(["early_stopping_mode", self.early_stopping.mode], ignore_index=True)
-                df = df.append(["early_stopping_patience", self.early_stopping.patience], ignore_index=True)
+                df = df.append({"parameter": "early_stopping_metric", "value": self.early_stopping.metric}, ignore_index=True)
+                df = df.append({"parameter": "early_stopping_mode", "value": self.early_stopping.mode}, ignore_index=True)
+                df = df.append({"parameter": "early_stopping_patience", "value": self.early_stopping.patience}, ignore_index=True)
 
         except AttributeError:
             print("AttributeError occured")
 
-        df.to_csv(os.path.join(save_dir, "hyperparameters.csv"))
+        df.to_csv(os.path.join(save_dir, "hyperparameters.csv"), index=False)
 
