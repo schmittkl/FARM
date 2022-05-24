@@ -234,7 +234,7 @@ class Evaluator:
                                   row['f1_score'] = row_data[4]
                                   row['support'] = row_data[5]
                                   df_tmp = pd.DataFrame(row, index=[0])
-                                  df_report = pd.concat([df_report, df_tmp], axis=1, ignore_index=True)
+                                  df_report = pd.concat([df_report, df_tmp], ignore_index=True)
                                 elif len(row_data) > 4: 
                                   row['epoch'] = epoch
                                   row['step'] = steps
@@ -244,7 +244,7 @@ class Evaluator:
                                   row['f1_score'] = row_data[3]
                                   row['support'] = row_data[4]
                                   df_tmp = pd.DataFrame(row, index=[0])
-                                  df_report = pd.concat([df_report, df_tmp], axis=1, ignore_index=True)
+                                  df_report = pd.concat([df_report, df_tmp], ignore_index=True)
                                 elif len(row_data) == 3:
                                   row['epoch'] = epoch
                                   row['step'] = steps
@@ -252,7 +252,7 @@ class Evaluator:
                                   row['f1_score'] = row_data[1]
                                   row['support'] = row_data[2]
                                   df_tmp = pd.DataFrame(row, index=[0])
-                                  df_report = pd.concat([df_report, df_tmp], axis=1, ignore_index=True)
+                                  df_report = pd.concat([df_report, df_tmp], ignore_index=True)
                         except Exception as e:
                             print(e)
                     else:
@@ -263,8 +263,8 @@ class Evaluator:
                             row['step'] = steps
                             row['metric_name'] = metric_name
                             row['metric_value'] = metric_val
-                            df_tmp = pd.DataFrame(row, index=[0])
-                            df_report = pd.concat([df_report, df_tmp], axis=1, ignore_index=True)
+                            df_temp = pd.DataFrame(row, index=[0])
+                            df_metrics = pd.concat([df_metrics, df_temp], ignore_index=True)
         if eval_dir:
             metrics_file = eval_dir + "/eval_metrics_" + dataset_name + ".csv"
             report_file = eval_dir + "/eval_report_" + dataset_name + ".csv"
