@@ -648,25 +648,28 @@ class Trainer:
             df.loc[2,'value'] = self.data_silo.batch_size
             df.loc[3,'parameter'] = "gradient_accumulation_steps"
             df.loc[3,'value'] = self.grad_acc_steps
-            df.loc[4,'parameter'] = "class_weights"
-            df.loc[4,'value'] = self.model.class_weights
-
+            
             if self.early_stopping:
-                df.loc[5,'parameter'] = "early_stopping_metric"
-                df.loc[5,'value'] = self.early_stopping.metric
-                df.loc[6,'parameter'] = "early_stopping_mode"
-                df.loc[6,'value'] = self.early_stopping.mode
-                df.loc[7,'parameter'] = "early_stopping_patience"
-                df.loc[7,'value'] = self.early_stopping.patience
-                df.loc[8,'parameter'] = "strat_shuff_split"
-                df.loc[8,'value'] = self.data_silo.strat_shuff_split
-                df.loc[9,'parameter'] = "shuffle_split"
-                df.loc[9,'value'] = self.data_silo.shuffle_split
+                df.loc[4,'parameter'] = "early_stopping_metric"
+                df.loc[4,'value'] = self.early_stopping.metric
+                df.loc[5,'parameter'] = "early_stopping_mode"
+                df.loc[5,'value'] = self.early_stopping.mode
+                df.loc[6,'parameter'] = "early_stopping_patience"
+                df.loc[6,'value'] = self.early_stopping.patience
+                df.loc[7,'parameter'] = "strat_shuff_split"
+                df.loc[7,'value'] = self.data_silo.strat_shuff_split
+                df.loc[8,'parameter'] = "shuffle_split"
+                df.loc[8,'value'] = self.data_silo.shuffle_split
+                df.loc[9,'parameter'] = "class_weights"
+                df.loc[9,'value'] = self.model.class_weights
+
             else:
-                df.loc[5,'parameter'] = "strat_shuff_split"
-                df.loc[5,'value'] = self.data_silo.strat_shuff_split
-                df.loc[6,'parameter'] = "shuffle_split"
-                df.loc[6,'value'] = self.data_silo.shuffle_split
+                df.loc[4,'parameter'] = "strat_shuff_split"
+                df.loc[4,'value'] = self.data_silo.strat_shuff_split
+                df.loc[5,'parameter'] = "shuffle_split"
+                df.loc[5,'value'] = self.data_silo.shuffle_split
+                df.loc[6,'parameter'] = "class_weights"
+                df.loc[6,'value'] = self.model.class_weights
                 
         except Exception as e:
             print(e)
