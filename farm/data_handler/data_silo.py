@@ -48,6 +48,8 @@ class DataSilo:
         max_processes=128,
         caching=False,
         cache_path=Path("cache/data_silo"),
+        strat_shuff_split=None,
+        shuffle_split=None
     ):
         """
         :param processor: A dataset specific Processor object which will turn input (file or dict) into a Pytorch Dataset.
@@ -85,6 +87,8 @@ class DataSilo:
         self.caching = caching
         self.cache_path = cache_path
         self.tensor_names = None
+        self.strat_shuff_split = strat_shuff_split
+        self.shuffle_split = shuffle_split
         if eval_batch_size is None:
             self.eval_batch_size = batch_size
         else:
@@ -98,6 +102,13 @@ class DataSilo:
             if max_processes != 1:
                 logger.warning("Multiprocessing not efficient for WordEmbedding Tokenizers. Please set max_process \n"
                             "argument in DataSilo to 1.")
+
+        # when the random values for splitting are not supplied, use previous approach
+        if self.strat_shuff_split is None:
+            self.strat_shuff_split = self.processor.dev_split
+
+        if self.shuffle_split is None:
+            self.shuffle_split = self.processor.dev_split
 
         loaded_from_cache = False
         if self.caching:  # Check if DataSets are present in cache
@@ -395,7 +406,7 @@ class DataSilo:
                 ytensors = [t[3][0] for t in self.data["train"]]
                 Y = torch.stack(ytensors)
                 from sklearn.model_selection import StratifiedShuffleSplit
-                splitter = StratifiedShuffleSplit(n_splits=1, test_size=self.processor.dev_split)
+                splitter = StratifiedShuffleSplit(n_splits=1, test_size=self.strat_shuff_split)
                 train_idxs, dev_idxs = next(splitter.split(list(range(len(self.data["train"]))), Y))
                 train_idx_set = set([i for i in train_idxs])  # DEBUG
                 dev_idx_set = set([i for i in dev_idxs])  # DEBUG
@@ -409,7 +420,7 @@ class DataSilo:
                 self.data["train"] = new_train
             elif self.processor.dev_stratification is False:
                 from sklearn.model_selection import ShuffleSplit
-                splitter = ShuffleSplit(n_splits=1, test_size=self.processor.dev_split)
+                splitter = ShuffleSplit(n_splits=1, test_size=self.shuffle_split)
                 train_idxs, dev_idxs = next(splitter.split(list(range(len(self.data["train"])))))
                 train_idx_set = set([i for i in train_idxs])  # DEBUG
                 dev_idx_set = set([i for i in dev_idxs])  # DEBUG
@@ -565,7 +576,7 @@ class DataSilo:
         max_seq_len = [q_max_seq_len, p_max_seq_len]
         return clipped, ave_len, seq_lens, max_seq_len
 
-    def calculate_class_weights(self, task_name, source="train"):
+    def calculate_class_weights(self, task_name, weights=None, source="train"):
         """ For imbalanced datasets, we can calculate class weights that can be used later in the
         loss function of the prediction head to upweight the loss of minorities.
 
@@ -592,7 +603,10 @@ class DataSilo:
                 observed_labels += [label_list[x[tensor_idx].item()] for x in dataset]
 
         #TODO scale e.g. via logarithm to avoid crazy spikes for rare classes
-        class_weights = compute_class_weight("balanced", classes=np.asarray(label_list), y=observed_labels)
+        if weights is not None:
+            class_weights = compute_class_weight(weights, classes=np.asarray(label_list), y=observed_labels)
+        else:
+            class_weights = compute_class_weight("balanced", classes=np.asarray(label_list), y=observed_labels)
 
         # conversion necessary to have class weights of same type as model weights
         class_weights = class_weights.astype(np.float32)
