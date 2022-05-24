@@ -6,6 +6,7 @@ from tqdm import tqdm
 import numpy
 import shutil
 import dill
+import os
 from pandas import DataFrame
 import os
 
@@ -650,17 +651,38 @@ class Trainer:
         df = DataFrame(columns=["parameter", "value"])
 
         try:
-            df = df.append({"parameter": "dev_split", "value": self.data_silo.processor.dev_split}, ignore_index=True)
-            df = df.append({"parameter": "max_seq_len", "value": self.data_silo.processor.max_seq_len}, ignore_index=True)
-            df = df.append({"parameter": "batch_size", "value": self.data_silo.batch_size}, ignore_index=True)
-
+            df.loc[0,'parameter'] = "dev_split"
+            df.loc[0,'value'] = self.data_silo.processor.dev_split
+            df.loc[1,'parameter'] = "max_seq_len"
+            df.loc[1,'value'] = self.data_silo.processor.max_seq_len
+            df.loc[2,'parameter'] = "batch_size"
+            df.loc[2,'value'] = self.data_silo.batch_size
+            df.loc[3,'parameter'] = "gradient_accumulation_steps"
+            df.loc[3,'value'] = self.grad_acc_steps
+            
             if self.early_stopping:
-                df = df.append({"parameter": "early_stopping_metric", "value": self.early_stopping.metric}, ignore_index=True)
-                df = df.append({"parameter": "early_stopping_mode", "value": self.early_stopping.mode}, ignore_index=True)
-                df = df.append({"parameter": "early_stopping_patience", "value": self.early_stopping.patience}, ignore_index=True)
+                df.loc[4,'parameter'] = "early_stopping_metric"
+                df.loc[4,'value'] = self.early_stopping.metric
+                df.loc[5,'parameter'] = "early_stopping_mode"
+                df.loc[5,'value'] = self.early_stopping.mode
+                df.loc[6,'parameter'] = "early_stopping_patience"
+                df.loc[6,'value'] = self.early_stopping.patience
+                df.loc[7,'parameter'] = "strat_shuff_split"
+                df.loc[7,'value'] = self.data_silo.strat_shuff_split
+                df.loc[8,'parameter'] = "shuffle_split"
+                df.loc[8,'value'] = self.data_silo.shuffle_split
+                df.loc[9,'parameter'] = "class_weights"
+                df.loc[9,'value'] = self.model.class_weights
 
-        except AttributeError:
-            print("AttributeError occured")
+            else:
+                df.loc[4,'parameter'] = "strat_shuff_split"
+                df.loc[4,'value'] = self.data_silo.strat_shuff_split
+                df.loc[5,'parameter'] = "shuffle_split"
+                df.loc[5,'value'] = self.data_silo.shuffle_split
+                df.loc[6,'parameter'] = "class_weights"
+                df.loc[6,'value'] = self.model.class_weights
+                
+        except Exception as e:
+            print(e)
 
         df.to_csv(os.path.join(save_dir, "hyperparameters.csv"), index=False)
-
