@@ -658,7 +658,6 @@ class Trainer:
                 df.loc[6,'value'] = self.early_stopping.mode
                 df.loc[7,'parameter'] = "early_stopping_patience"
                 df.loc[7,'value'] = self.early_stopping.patience
-                
                 df.loc[8,'parameter'] = "strat_shuff_split"
                 df.loc[8,'value'] = self.data_silo.strat_shuff_split
                 df.loc[9,'parameter'] = "shuffle_split"
@@ -669,10 +668,7 @@ class Trainer:
                 df.loc[6,'parameter'] = "shuffle_split"
                 df.loc[6,'value'] = self.data_silo.shuffle_split
                 
-            
-
-        except AttributeError as e:
+        except Exception as e:
             print(e)
 
         df.to_csv(os.path.join(save_dir, "hyperparameters.csv"), index=False)
-        
