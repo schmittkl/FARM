@@ -6,6 +6,7 @@ from tqdm import tqdm
 import numpy
 import shutil
 import dill
+import os
 from pandas import DataFrame
 
 from farm.utils import MLFlowLogger as MlLogger
