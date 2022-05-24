@@ -636,23 +636,35 @@ class Trainer:
             return True
 
     def _save_hyperparameters(self, save_dir):
-        df = DataFrame(columns=["parameter", "value"])
+        df = pd.DataFrame(columns=["parameter", "value"])
 
         try:
-            df = df.append(["parameter_name", "parameter_value"], ignore_index=True)
-        
-            df = df.append(["dev_split", self.data_silo.processor.dev_split], ignore_index=True)
-            df = df.append(["max_seq_len", self.data_silo.processor.max_seq_len], ignore_index=True)
-            df = df.append(["batch_size", self.data_silo.batch_size], ignore_index=True)
+            df.loc[0,'parameter'] = "dev_split"
+            df.loc[0,'value'] = self.data_silo.processor.dev_split
+
+            df.loc[1,'parameter'] = "max_seq_len"
+            df.loc[1,'value'] = self.data_silo.processor.max_seq_len
+            df.loc[2,'parameter'] = "batch_size"
+            df.loc[2,'value'] = self.data_silo.batch_size
+            df.loc[3,'parameter'] = "gradient_accumulation_steps"
+            df.loc[3,'value'] = self.grad_acc_steps
+            df.loc[4,'parameter'] = "strat_shuff_split"
+            df.loc[4,'value'] = self.data_silo.strat_shuff_split
+            df.loc[5,'parameter'] = "shuffle_split"
+            df.loc[5,'value'] = self.data_silo.shuffle_split
+            df.loc[6,'parameter'] = "class_weights"
+            df.loc[6,'value'] = self.model.class_weights
 
             if self.early_stopping:
-                df = df.append(["early_stopping_metric", self.early_stopping.metric], ignore_index=True)
-                df = df.append(["early_stopping_mode", self.early_stopping.mode], ignore_index=True)
-                df = df.append(["early_stopping_patience", self.early_stopping.patience], ignore_index=True)
+                df.loc[7,'parameter'] = "early_stopping_metric"
+                df.loc[7,'value'] = self.early_stopping.metric
+                df.loc[8,'parameter'] = "early_stopping_mode"
+                df.loc[8,'value'] = self.early_stopping.mode
+                df.loc[9,'parameter'] = "early_stopping_patience"
+                df.loc[9,'value'] = self.early_stopping.patience
 
-        except AttributeError:
-            print("AttributeError occured")
+        except AttributeError as e:
+            print(e)
 
-        df.to_csv(save_dir)
+        df.to_csv(os.path.join(save_dir, "hyperparameters.csv"), index=False)
         
-
