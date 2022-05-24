@@ -636,7 +636,7 @@ class Trainer:
             return True
 
     def _save_hyperparameters(self, save_dir):
-        df = pd.DataFrame(columns=["parameter", "value"])
+        df = DataFrame(columns=["parameter", "value"])
 
         try:
             df.loc[0,'parameter'] = "dev_split"
