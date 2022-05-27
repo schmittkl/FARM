@@ -672,7 +672,7 @@ class Trainer:
                 df.loc[8,'parameter'] = "shuffle_split"
                 df.loc[8,'value'] = self.data_silo.shuffle_split
                 df.loc[9,'parameter'] = "class_weights"
-                df.loc[9,'value'] = self.model.class_weights
+                df.loc[9,'value'] = self.model.predicion_heads[0].class_weights
 
             else:
                 df.loc[4,'parameter'] = "strat_shuff_split"
@@ -680,7 +680,7 @@ class Trainer:
                 df.loc[5,'parameter'] = "shuffle_split"
                 df.loc[5,'value'] = self.data_silo.shuffle_split
                 df.loc[6,'parameter'] = "class_weights"
-                df.loc[6,'value'] = self.model.class_weights
+                df.loc[6,'value'] = self.model.predicion_heads[0].class_weights
                 
         except Exception as e:
             print(e)
