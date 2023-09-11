@@ -160,7 +160,7 @@ def compute_report_metrics(head, preds, labels):
             target_names=head.label_list
         )
     else:
-        return report_fn(labels, preds)
+        return report_fn(labels, preds, digits=4)
 
 
 def squad_EM(preds, labels):
